@@ -1,0 +1,80 @@
+import os
+import sys
+
+Import('env dirs name')
+
+libraries = [
+    'freelan',
+    'asiotap',
+    'fscp',
+    'cryptoplus',
+    'executeplus',
+    'kfather',
+    'iconvplus',
+    'boost_system',
+    'boost_filesystem',
+    'boost_date_time',
+    'boost_program_options',
+    'boost_iostreams',
+    'curl',
+    'ssl',
+    'crypto',
+]
+
+# pick up the either boost_thread or boost_thread-mt library
+conf = Configure(env)
+if not conf.CheckLib('boost_thread'):
+    libraries.extend([
+        'boost_thread-mt',
+    ])
+else:
+    libraries.extend([
+        'boost_thread',
+    ])
+env = conf.Finish()
+
+if sys.platform.startswith('linux'):
+    libraries.extend([
+        'pthread',
+        'netlinkplus',
+    ])
+else:
+    if sys.platform.startswith('darwin'):
+        libraries.extend([
+            'ldap',
+            'z',
+            'iconv',
+        ])
+    if sys.platform.startswith('freebsd'):
+        libraries.extend([
+            'pthread',
+            'c++',
+        ])
+    if sys.platform.startswith('openbsd'):
+        libraries.extend([
+            'iconv',
+        ])
+
+if env.mongoose == 'yes':
+    libraries.insert(3, 'mongooseplus')
+
+if env.upnp == 'yes':
+    libraries.extend([
+    'miniupnpcplus',
+    'miniupnpc',
+    ])
+
+env = env.Clone()
+env.Prepend(LIBS=libraries)
+
+sources = list(sorted(set(env.RGlob('src', '*.cpp')) - set(env.RGlob(os.path.join('src', 'windows'), '*.cpp'))))
+app = env.Program(target=os.path.join(str(dirs['bin']), name), source=sources)
+configuration = env.File(env.RGlob('config', '*.cfg'))
+help = []
+
+h2m = env.WhereIs('help2man', os.environ['PATH'])
+if h2m:
+    env['HELP2MAN'] = h2m
+    help = env.Command(target=os.path.join(str(dirs['man']), name + '.1'), source=os.path.join(str(dirs['bin']), name), action ='$HELP2MAN $SOURCE > $TARGET')
+
+Return('app configuration help')
