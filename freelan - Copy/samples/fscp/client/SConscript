@@ -1,0 +1,36 @@
+import os
+import sys
+
+Import('env dirs name')
+
+libraries = [
+    'fscp',
+    'cryptoplus',
+    'boost_system',
+    'crypto',
+    'pthread'
+]
+
+if env.upnp == 'yes':
+    libraries.extend([
+        'miniupnpcplus',
+        'miniupnpc',
+    ])
+
+# pick up the either boost_thread or boost_thread-mt library
+conf = Configure(env)
+if not conf.CheckLib('boost_thread'):
+    libraries.extend([
+        'boost_thread-mt',
+    ])
+else:
+    libraries.extend([
+        'boost_thread',
+    ])
+env = conf.Finish()
+
+env = env.Clone()
+env.Append(LIBS=libraries)
+samples = env.Program(target=os.path.join(str(dirs['bin']), name), source=env.RGlob('.', ['*.cpp']))
+
+Return('samples')

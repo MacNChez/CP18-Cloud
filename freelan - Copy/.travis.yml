@@ -1,0 +1,39 @@
+language: cpp
+compiler:
+    - g++
+matrix:
+  include:
+    - os: linux
+      dist: bionic 
+      sudo: false
+    - os: osx
+addons:
+  apt:
+    packages:
+      - libboost-all-dev
+      - libssl-dev
+      - libcurl4-openssl-dev
+      - libminiupnpc-dev
+      - gcc
+      - g++
+      - scons
+      - help2man
+  homebrew:
+    packages:
+      - scons
+      - boost
+      - openssl
+      - miniupnpc
+      - help2man
+    update: true
+
+script: scons install apps samples
+
+branches:
+    only:
+        - master
+
+notifications:
+    email:
+        on_success: change
+        on_failure: always

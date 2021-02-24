@@ -1,0 +1,63 @@
+version: 2.3.{build}
+
+shallow_clone: true
+
+image: Visual Studio 2019
+
+environment:
+  matrix:
+    - platform: x64
+      ARCH_BITS: 64
+      INSTALLER_BITS: amd64
+    - platform: x86
+      ARCH_BITS: 32
+      INSTALLER_BITS: x86
+
+configuration:
+  - Release
+  - Debug
+
+init:
+  - '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%'
+
+install:
+  - cinst cmake python
+  # Install python wheels, necessary to install SCons via pip
+  - python -m pip install wheel
+  # Install SCons
+  - python -m pip install scons
+  - scons --version
+
+before_build:
+  - vcpkg integrate install
+  - vcpkg install libiconv --triplet %PLATFORM%-windows-static
+  - vcpkg install boost-asio boost-thread boost-system boost-program-options boost-filesystem boost-iostreams boost-random boost-foreach --triplet %PLATFORM%-windows-static
+  - vcpkg install curl --triplet %PLATFORM%-windows-static
+  - vcpkg install openssl --triplet %PLATFORM%-windows-static
+  - vcpkg install miniupnpc --triplet %PLATFORM%-windows-static
+
+build_script:
+  - 'nmake -f Makefile.windows build_%CONFIGURATION%_%PLATFORM%'
+
+after_build:
+  - 7z a BuildArtifacts.zip install\*
+  - ps: >-
+          $gitHash = $env:APPVEYOR_REPO_COMMIT.Substring(0, 8);
+          $zipFile   = "freelan-binary-$env:platform-$gitHash.zip";
+          Push-AppveyorArtifact "BuildArtifacts.zip" -FileName $zipFile;
+
+          If ($env:Configuration -Match "Release") {
+            scons -C packaging\windows --arch=%INSTALLER_BITS%
+
+            $setupFile = "freelan-setup-$env:platform-$gitHash.exe";
+            $installerFile = Get-ChildItem -Path .\packaging\windows\ -Filter *.exe | Select-Object -First 1;
+            Push-AppveyorArtifact $installerFile.FullName -FileName $setupFile;
+          }
+
+branches:
+    only:
+        - master
+
+on_failure:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
