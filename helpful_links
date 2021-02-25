@@ -1,8 +1,7 @@
-https://howchoo.com/g/njy4zdm3mwy/how-to-run-a-raspberry-pi-cluster-with-docker-swarm
-https://docs.docker.com/engine/swarm/stack-deploy/
-https://docs.docker.com/network/overlay/#:~:text=All%20swarm%20service%20management%20traffic,when%20creating%20the%20overlay%20network.
-https://techbeacon.com/enterprise-it/essential-guide-software-containers-application-development
-https://octopus.com/blog/raspberry-pi-cluster-lessons-learned
-https://www.maketecheasier.com/create-own-linux-vpn/
-https://cluster.ipfs.io/documentation/quickstart/
-https://security.stackexchange.com/questions/31030/connect-through-two-vpn-clients
+[Docker Swarm Guide](https://howchoo.com/g/njy4zdm3mwy/how-to-run-a-raspberry-pi-cluster-with-docker-swarm)
+[Docker How to Overlay Network](https://docs.docker.com/network/overlay/#:~:text=All%20swarm%20service%20management%20traffic,when%20creating%20the%20overlay%20network.)
+[More info on Docker Applications](https://techbeacon.com/enterprise-it/essential-guide-software-containers-application-development)
+[Docker Swarm Example](https://octopus.com/blog/raspberry-pi-cluster-lessons-learned)
+[OpenVPN Guide](https://www.maketecheasier.com/create-own-linux-vpn/)
+[IPFS Guide](https://cluster.ipfs.io/documentation/quickstart/)
+[Running Dual VPN](https://security.stackexchange.com/questions/31030/connect-through-two-vpn-clients)
