@@ -1,42 +1,3 @@
-
-# Getting Persistent Docker Storage via GlusterFS
-
-(Currently configured for Ubuntu18.04 - will have to find differences for Pi-based architectures)
-
-## Baseline Upgrade
-
-
-
-```
-sudo apt-get update
-sudo apt-get upgrade -y
-```
-
-## Ensuring all Docker Hosts known in hosts file:
-
-```
-sudo nano /etc/hosts
-
-Example: 
-192.168.1.67 docker-master
-192.168.1.107 docker-node1
-192.168.1.117 docker-node2
-```
-
-## Deploying Swarm
-Install Docker
-```
-sudo apt-get install docker.io -y
-
-sudo systemctl start docker
-sudo systemctl enable docker
-
-sudo usermod -aG docker $USER
-sudo newgrp docker
-
-#only done on master(s)
-docker swarm init --advertise-addr 'xxx.xxx.xxx.xxx'
-
 # Getting Persistent Docker Storage via GlusterFS
 
 (Currently configured for Ubuntu18.04 - will have to find differences for Pi-based architectures)
@@ -114,7 +75,7 @@ sudo gluster volume create staging-gfs replica 3 docker-master:/gluster/volume1 
 sudo gluster volume start staging-gfs
 ```
 
-Ensure volume mounts on reboot - mount to /mnt shared directory
+# Ensure volume mounts on reboot - mount to /mnt shared directory
 ```
 sudo -s
 echo 'localhost:/staging-gfs /mnt glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0' >> /etc/fstab
@@ -123,7 +84,7 @@ chown -R root:docker /mnt
 exit
 ```
 
-Verify mounting:
+# Verify mounting:
 ```
 df -h
 ```
