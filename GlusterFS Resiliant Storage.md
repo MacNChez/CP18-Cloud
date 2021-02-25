@@ -75,7 +75,7 @@ sudo gluster volume create staging-gfs replica 3 docker-master:/gluster/volume1 
 sudo gluster volume start staging-gfs
 ```
 
-# Ensure volume mounts on reboot - mount to /mnt shared directory
+### Ensure volume mounts on reboot - mount to /mnt shared directory
 ```
 sudo -s
 echo 'localhost:/staging-gfs /mnt glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0' >> /etc/fstab
@@ -84,7 +84,7 @@ chown -R root:docker /mnt
 exit
 ```
 
-# Verify mounting:
+### Verify mounting:
 ```
 df -h
 ```
