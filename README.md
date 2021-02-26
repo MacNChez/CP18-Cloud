@@ -17,3 +17,6 @@ Ongoing Project by Microsoft Software and Systems Academy Camp Pendleton Cohort 
 - [Charles Ford](https://www.linkedin.com/in/charlesford1/ "Charles Ford")
 - [Brianna Mikus](https://www.linkedin.com/in/brianna-mikus/ "Brianna Mikus")
 - [Virgil Pua](https://www.linkedin.com/in/virgil-pua/ "Virgil Pua")
+
+### GitHub Pull Request Guide:
+- [GitHub How To](https://opensource.com/article/19/7/create-pull-request-github)
