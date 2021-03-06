@@ -1,4 +1,4 @@
-### How to Configure ZeroTier
+# How to Configure ZeroTier
 
 ## Using Web Based Controller
 ```
@@ -12,9 +12,9 @@ zerotier-cli join <network-id>
  ```
 ## Using Locally Designed Controller
 
-# CREATING CONTROLLER ON PI via K3S(lightweight kubernentes):
+### CREATING CONTROLLER ON PI via K3S(lightweight kubernentes):
 
-# PREREQS TO INSTALLING K3S
+### PREREQS TO INSTALLING K3S
 - Update cmdline boot doc to enable cgroup memory (requirement for k3s functionality on pi)
 ```
 sudo nano /boot/cmdline.txt
@@ -28,7 +28,7 @@ sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 sudo reboot
 ```
 
-## install k3s:
+### install k3s:
 ```
 sudo curl -sfL https://get.k3s.io | sh -
 sudo nano ztncui.yaml (in user dir)
@@ -53,7 +53,7 @@ sudo k3s kubectl apply -f ztncui.yaml
 sudo k3s kubectl get pods --all-namespaces --watch
 ```
 
-## start port forward to access gui:
+### start port forward to access gui:
 ```
 sudo kubectl port-forward svc/zerotier-controller-ui-ztncui 3000:3000
 ```
