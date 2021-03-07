@@ -1,0 +1,13 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: zerotier-controller-ui
+  namespace: kube-system
+spec:
+  helmVersion: v1
+  name: ztncui 
+  chart: https://iotops.gitlab.io/charts/ztncui-0.1.0.tgz
+  targetNamespace: default
+  set:
+    ingress.hosts[0]: zt.labs.3xmgroup.com
+
