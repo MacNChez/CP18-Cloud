@@ -4,21 +4,17 @@
 ```
 curl -s https://install.zerotier.com | sudo bash
 
-sudo chown $USER:group .zeroTierOneAuthToken
-sudo cat /var/lib/zerotier-one/authtoken.secret >>.zeroTierOneAuthToken
-chmod 0600 .zeroTierOneAuthToken
-
 zerotier-cli join <network-id>
  ```
 ## Using Locally Designed Controller
 
-### CREATING CONTROLLER ON PI via K3S(lightweight kubernentes):
+### Joining K3S Cluster for Controller Redundancy
 
 ### PREREQS TO INSTALLING K3S
 - Update cmdline boot doc to enable cgroup memory (requirement for k3s functionality on pi)
 ```
 sudo nano /boot/cmdline.txt
-console=serial0,115200 console=tty1 root=PARTUUID=58b06195-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait cgroup_memory=1 cgroup_enable=memory
+append cgroup_memory=1 cgroup_enable=memory to end of cmdline
 ```
 - k3s needs to specify iptables for pi legacy
 ```
@@ -28,33 +24,37 @@ sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 sudo reboot
 ```
 
-### install k3s:
+### Install K3S as Worker Node:
 ```
-sudo curl -sfL https://get.k3s.io | sh -
-sudo nano ztncui.yaml (in user dir)
+curl -sfL https://get.k3s.io | K3S_URL=https://10.20.30.251:6443 K3S_TOKEN=K10c6edb3fb6ec36c5e1767afcb286f653cdddcee9124f136199d25e003caef05fc::server:7ff1de6a5308b41cd2d78e354b461e52 sh -
 ```
+### Install config file from master
 ```
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: zerotier-controller-ui
-  namespace: kube-system
-spec:
-  helmVersion: v1
-  name: ztncui
-  chart: https://iotops.gitlab.io/charts/ztncui-0.1.0.tgz
-  targetNamespace: default
-```
-```
-sudo k3s kubectl apply -f ztncui.yaml
-```
-- validate:
-```
-sudo k3s kubectl get pods --all-namespaces --watch
+sudo nano ~/.kube/config
+
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkekNDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdGMyVnkKZG1WeUxXTmhRREUyTVRVeU5UazVNVEF3SGhjTk1qRXdNekE1TURNeE9ETXdXaGNOTXpFd016QTNNRE14T0RNdwpXakFqTVNFd0h3WURWUVFEREJock0zTXRjMlZ5ZG1WeUxXTmhRREUyTVRVeU5UazVNVEF3V1RBVEJnY3Foa2pPClBRSUJCZ2dxaGtqT1BRTUJCd05DQUFRSjNVMDlCV3lXUkVwbmdlQy82QWNEcWszTkdPV2x1NExpQllmdXNrSGkKd2Z5M0ErVENaTXd3RTdDd3BwTkZTZVJmMUZuZ0ZINE1NbVB4aG94MkVXTFhvMEl3UURBT0JnTlZIUThCQWY4RQpCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXZRZWhkUFZ1cVhUWDk1cDQ4T3Y1CmtzT0xnMUl3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUloQUlOQnRhT3IycDlJbDgxVUZtbStqdTZYWDN5TkZ5dFgKZUhpVit1MHJhY3BjQWlBK0VFTkY1NGJ6TjNQM2xKdEZPSXRqSERpd0hmcjBIS0d0UFNnU25VVzlPdz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    server: https://10.20.30.251:6443
+  name: default
+contexts:
+- context:
+    cluster: default
+    user: default
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: default
+  user:
+    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJrVENDQVRlZ0F3SUJBZ0lJSGVQYmthS1RXV2N3Q2dZSUtvWkl6ajBFQXdJd0l6RWhNQjhHQTFVRUF3d1kKYXpOekxXTnNhV1Z1ZEMxallVQXhOakUxTWpVNU9URXdNQjRYRFRJeE1ETXdPVEF6TVRnek1Gb1hEVEl5TURNdwpPVEF6TVRnek1Gb3dNREVYTUJVR0ExVUVDaE1PYzNsemRHVnRPbTFoYzNSbGNuTXhGVEFUQmdOVkJBTVRESE41CmMzUmxiVHBoWkcxcGJqQlpNQk1HQnlxR1NNNDlBZ0VHQ0NxR1NNNDlBd0VIQTBJQUJMYzlvSzZSV2tRcy9ha3AKV1dxMDdoaWdBQndXMUtES2dmVDZJcnBPTlZuQWMvbE1melRRZUwvNENVcS9QN2ZrSmNtc21pZ2RlTzZwNjNlUgpabE1rTGNtalNEQkdNQTRHQTFVZER3RUIvd1FFQXdJRm9EQVRCZ05WSFNVRUREQUtCZ2dyQmdFRkJRY0RBakFmCkJnTlZIU01FR0RBV2dCVFpmY2ozZ0ZZV2Q1cmVWLzA1UFQ0L3prSkszVEFLQmdncWhrak9QUVFEQWdOSUFEQkYKQWlBbUl0bzhCQWg5MEJmekl5RS85TkQ3Z0c1U0EwV2Q1amdjd0JHb1VDNVNmd0loQUlsdm5Md1pXak9GQTFteQpKNHkvM3g3N1JNS2lubjNNQ2cvWHJzanQvbVBrCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJlRENDQVIyZ0F3SUJBZ0lCQURBS0JnZ3Foa2pPUFFRREFqQWpNU0V3SHdZRFZRUUREQmhyTTNNdFkyeHAKWlc1MExXTmhRREUyTVRVeU5UazVNVEF3SGhjTk1qRXdNekE1TURNeE9ETXdXaGNOTXpFd016QTNNRE14T0RNdwpXakFqTVNFd0h3WURWUVFEREJock0zTXRZMnhwWlc1MExXTmhRREUyTVRVeU5UazVNVEF3V1RBVEJnY3Foa2pPClBRSUJCZ2dxaGtqT1BRTUJCd05DQUFSOThyMHpubVJ2M1dKS0FYYWdYNzZMT1QyaTFsK2xNYjF4TkRPS1ZjTnYKdWQrVXJ1cVFja1JnT1dxck5wSnlPVDZIeGRaVE9CMnZucDdlbnBpQUdWbEdvMEl3UURBT0JnTlZIUThCQWY4RQpCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVTJYM0k5NEJXRm5lYTNsZjlPVDArClA4NUNTdDB3Q2dZSUtvWkl6ajBFQXdJRFNRQXdSZ0loQU9qWG5wYVJaenZ4ZkNOTWJvSSs3NXdWOFdoWmYya1kKeTBTV3NHV3BBbXMzQWlFQXBJQnB2cmhXSEswVFJObERkckppQ2QwbFJGOHRmTWNOK2ZZbEQrUlNXcnc9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    client-key-data: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUo2RUJzY3J6bzhrQjQ4b0pKbFpmYlVlMitCTFJRRTlaNjBJUEVadTNQNDVvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFdHoyZ3JwRmFSQ3o5cVNsWmFyVHVHS0FBSEJiVW9NcUI5UG9pdWs0MVdjQnorVXgvTk5CNAp2L2dKU3I4L3QrUWx5YXlhS0IxNDdxbnJkNUZtVXlRdHlRPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
 ```
 
-### start port forward to access gui:
+### Validate the ZTNCUI pod has replicated to your machine:
 ```
-sudo kubectl port-forward svc/zerotier-controller-ui-ztncui 3000:3000
+sudo k3s kubectl get pods --all-namespaces
 ```
-- default login: admin/password
+#### Look for pod under 'default' namespace
