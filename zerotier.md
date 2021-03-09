@@ -1,16 +1,18 @@
 # How to Configure ZeroTier
 
-## Using Web Based Controller
+## Install Zero Tier Client and join existing Network:
 ```
-curl -s https://install.zerotier.com | sudo bash
+curl -s https://install.zerotier.com | sudo bash #this installs the zerotier-one cli tool
 
 zerotier-cli join <network-id>
  ```
 ## Using Locally Designed Controller
 
 ### Joining K3S Cluster for Controller Redundancy
+K3S is a extremely lightweight version of Kubernetes with a containterd containerization daemon built in, we will use this
+to run our instance of the ZeroTier Network Controller to provide fallback/redundancy in case of node loss
 
-### PREREQS TO INSTALLING K3S
+### PREREQS TO INSTALLING K3S on Raspberry Pi
 - Update cmdline boot doc to enable cgroup memory (requirement for k3s functionality on pi)
 ```
 sudo nano /boot/cmdline.txt
