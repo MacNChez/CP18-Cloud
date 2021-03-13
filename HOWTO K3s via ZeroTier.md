@@ -28,7 +28,7 @@ do NOT join as a master if your device will not be able to handle the etcd datab
 ```
 export K3S_KUBECONFIG_MODE="644"
 export INSTALL_K3S_CHANNEL="latest"
-export INSTALL_K3S_EXEC="--flannel-iface zt7cqhx4cs" 
+export INSTALL_K3S_EXEC="--flannel-iface <zerotier-interface>" 
 ```
 ### Install K3s:
 ```
