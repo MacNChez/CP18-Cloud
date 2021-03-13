@@ -11,6 +11,13 @@ zerotier-cli join <network-id>
 ```
 - You are successfully join when you see a new interface added in the output of 'ifconfig'
 
+### REQUIRED FOR K3s ON RASPBERRY PI ARM ARCHITECTURE:
+Enable cgroups in cmdline.txt boot document:
+```
+sudo nano /boot/cmdline.txt
+```
+-Append "cgroup_memory=1 cgroup_enable=memory" to the end of the line and restart the machine
+
 
 ## Step 2(A): Install K3S as a new Master:
 In this scenario you will be joining your node as a new master to be joined to the cluster
@@ -45,3 +52,12 @@ systemctl restart k3s.service
 ```
 kubectl get nodes
 ```
+
+## Step 2(B): Install K3s as a Worker Node:
+This will install only the K3s Agent on the machine, and will not act as a Master for HA purposes
+```
+curl -sfL https://get.k3s.io | K3S_URL=https://<any cluster master zerotier IP>:6443 K3S_TOKEN=<K3s-node-token> INSTALL_K3S_EXEC="--flannel-iface <zerotier-interface>" sh -
+```
+### By default any worker node will not have access to manage K3s Cluster, will need to install /etc/rancher/k3s/k3s.yaml file into ~/.kube/config and set master IP
+
+
