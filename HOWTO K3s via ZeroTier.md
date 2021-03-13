@@ -1,4 +1,7 @@
 # How to Create a Highly Available K3S Multi-Master Cluster over the Internet via locally hosted ZeroTier & embedded etcd on Raspberry Pi's
+## Note: This will currently deploy with the default Traefik ingress controller, which is subject to change
+
+
 
 ## Step One: Install ZeroTier CLI Tool:
 ```
