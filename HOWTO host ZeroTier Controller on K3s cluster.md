@@ -1,45 +1,39 @@
-# How to Create a Highly Available K3S Multi-Master Cluster over the Internet via locally hosted ZeroTier & Azure-hosted etcd on Raspberry Pi's
-## Note: This will currently deploy with the default Traefik ingress controller, which is subject to change
+# How to Create a Highly Available ZeroTier Controller hosted on a Highly Available K3s Cluster
+## Note: This will only be done ONCE at the start of the cluster lifecycle, and can be scaled up and down as needed, but creating a new controller will result in a new network ID
 
 
 
-## Step One: Install ZeroTier CLI Tool:
+## Step One: Create YAML file for HELM deployment:
 ```
-sudo curl -s https://install.zerotier.com | sudo bash
-sudo chown 777 /var/lib/zerotier-one/authtoken.secret #Gives full access to authentication token to allow ZertoTier Network joining
-```
-- You will need to request the network ID of the ZeroTier private network, and wait for an approved member to accept the request
-```
-zerotier-cli join <network-id>
-```
-- You are successfully join when you see a new interface added in the output of 'ifconfig'
-
-### REQUIRED FOR K3s ON RASPBERRY PI ARM ARCHITECTURE:
-Enable cgroups in cmdline.txt boot document:
-```
-sudo nano /boot/cmdline.txt
-```
--Append "cgroup_memory=1 cgroup_enable=memory" to the end of the line and restart the machine
+sudo nano ztncui.yaml
 
 
-## Step 2(A): Install K3S as a new Master:
-In this scenario you will be joining your node as a new master to be joined to the cluster
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: zerotier-controller-ui
+  namespace: default
+spec:
+  helmVersion: v1
+  name: ztncui
+  chart: https://iotops.gitlab.io/charts/ztncui-0.1.0.tgz
+  targetNamespace: default
+```
+- This will deploy a chart from the specified repository, which will automate the deployment of the resource required for the zerotier controller and UI
 
-This scenario has the etcd workload running on an external Azure VM - this is subject to change
 
-### Install K3s:
+## Step 2: Apply the .YAML file
 ```
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.18.16+k3s1 K3S_DATASTORE_ENDPOINT='http://<public VM IP>:2379' INSTALL_K3S_EXEC="--flannel-iface ztppi4wr24" sh -
+kubectl apply -f ztncui.yaml
 ```
--You will need to get public IP before installing
--Wait for installation to finish, verify with 'kubectl get nodes'
+-Watch delployment progress: kubectl get pods --all-namespaces --watch
 
-## Step 2(B): Install K3s as a Worker Node:
-This will install only the K3s Agent on the machine, and will not act as a Master for HA purposes
+## Step 3: Port Forward the Service to access the GUI
+By default, the service will be running but will not be accessable outside of the pods running it, and will require forwarding of the port to manage access
 ```
-curl -sfL https://get.k3s.io | K3S_URL=https://<any cluster master zerotier IP>:6443 K3S_TOKEN=<K3s-node-token> INSTALL_K3S_EXEC="--flannel-iface <zerotier-interface>" sh -
+kubectl port-forward svc/zerotier-controller-ui-ztncui 6443:6443
 ```
-### By default any worker node will not have access to manage K3s Cluster, will need to install /etc/rancher/k3s/k3s.yaml file into ~/.kube/config and set master IP
+-Default login is admin:password
 
 
 
