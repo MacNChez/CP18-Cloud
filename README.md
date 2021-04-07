@@ -9,7 +9,11 @@ Ongoing Project by Microsoft Software and Systems Academy Camp Pendleton Cohort 
 - Redundant Docker Swarm for highly available application deployment
 - GlusterFS distributed storage for Docker/K3s persistent storage
 
-
+## Usage
+The provided How-To guides will walk you through the steps required to build a redundant, HA container environment on Raspberry Pi's for a low-cost, easy to make testing environment
+The current implementation makes use of an external Azure VM DB cluster for the K3s database, however this can be removed if a more efficient storage method is provided. The built in Pi storage via the MicroSD does not provide the required R/W speeds for an etcd database to function properly, and will result in reoccuring issues if attempted
+## Storage
+This implementation makes use of USB 3.0 thumb drives for Gluster storage, but this can just as easily be run using the builtin MicroSD storage as well.
 ### Contributors
 
 - [Jameson Hearn](https://www.linkedin.com/in/jameson-hearn/ "Jameson Hearn")
