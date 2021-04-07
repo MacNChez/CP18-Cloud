@@ -1,10 +1,8 @@
 # Getting Persistent Docker Storage via GlusterFS
-
-(Currently configured for Ubuntu18.04 - will have to find differences for Pi-based architectures)
+This process will build a Gluster volume inside of USB-attached storage on the Raspberry Pi cluster for access via Docker or K3s
+-Adding a new Node to the cluster will require changes to this process
 
 ## Baseline Upgrade
-
-
 
 ```
 sudo apt-get update
@@ -38,6 +36,24 @@ docker swarm init --advertise-addr 'xxx.xxx.xxx.xxx'
 #nodes will take command output and run to join swarm
 
 ```
+## Install xfsprogs and Convert USB storage
+This will be used to create the file system on the external storage
+```
+sudo apt-get install xfsprogs
+mkfs.xfs -i size=512 /dev/sda1
+```
+### Update fstab to ensure USB gets mounted to the specified directory upon startup
+```
+sudo nano /etc/fstab
+/dev/sda1 /mnt/usb0 xfs defaults 1 2
+```
+-ENSURE both specified directories exist or your device will fail to boot
+### Mount the USB
+```
+mount -a
+```
+-Can validate by checking the output of 'mount'
+
 
 ## Install GlusterFS
 ```
@@ -50,46 +66,44 @@ sudo systemctl start glusterd
 sudo systemctl enable glusterd
 ```
 
-## Generate SSH Keys
-```
-ssh-keygen -t rsa
-```
-
-## Probing Nodes
+## Probe Node to add to Cluster
 
 ```
-sudo -s
 gluster peer probe (docker-node1); gluster peer probe (docker-node2);
 #node names should be same as in host file
-gluster pool list
+```
+-validate with output of gluster pool list
+
+
+## Create Directories for Mounting
+
+```
+sudo mkdir /gfdata
+sudo mkdir /mnt/usb0/data
+sudo chmod 777 /gfdata #Gives full permission to the folder to all users/groups on the device - can update as needed
 ```
 
-## Create Gluster Volume
-
+## Create Gluster Volume and mount to USB storage
 ```
-sudo mkdir -p /gluster/volume1
-
-sudo gluster volume create staging-gfs replica 3 docker-master:/gluster/volume1 docker-node1:/gluster/volume1 docker-node2:/gluster/volume1 force
-#This would create 3 replicas across the two nodes specified - will change depending on deployment
-
-sudo gluster volume start staging-gfs
+sudo gluster volume create data replica 2 transport tcp master1:/mnt/usb0/data master4:/mnt/usb0/data
+sudo gluster volume start data 
 ```
 
-### Ensure volume mounts on reboot - mount to /mnt shared directory
+### Update fstab to mount Gluster volume on startup to an easily accessed directory
 ```
-sudo -s
-echo 'localhost:/staging-gfs /mnt glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0' >> /etc/fstab
-mount.glusterfs localhost:/staging-gfs /mnt
-chown -R root:docker /mnt
-exit
+sudo echo 'localhost:/data /gfdata glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0' >> /etc/fstab
+sudo mount.glusterfs localhost:/data /gfdata
+chown -R root:docker /gfdata
 ```
+-If permission denied, run sudo su and attempt the command again without sudo
+
 
 ### Verify mounting:
 ```
 df -h
 ```
 
-## Any Files/Folders made in /mnt on a node will persist in /gluster/volume1
+## Any Files/Folders made in /gfdata on a node will persist in /mnt/usb0/data ie; the local storage for the USB drive
 
 
 
