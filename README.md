@@ -16,7 +16,7 @@ The current implementation makes use of an external Azure VM DB cluster for the 
 ### Real World Applications
 Outside of the current usage for students as a test environment, the technologies employed in this project have clear applications to real-world scenarios inlcuding:
 
-- HPC (High Performance Computing)
+- HPC (High Performance Computing) - Cheap alternative for algorithm testing and data analysis
 - CDN (Content Delivery Network) - Cheap, edge-cached storage for geographically distributed data access
 - Point of Sale
 - CCTV
