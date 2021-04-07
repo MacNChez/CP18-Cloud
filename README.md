@@ -1,4 +1,5 @@
-![basic kubernetes net](https://user-images.githubusercontent.com/8126042/113800342-a0044180-970b-11eb-9719-c54fed7b0e34.png)
+![basic kubernetes net](https://user-images.githubusercontent.com/8126042/113801885-8e706900-970e-11eb-9664-98e14e207a9b.png)
+
 # CP18-Cloud
 Ongoing Project by Microsoft Software and Systems Academy Camp Pendleton Cohort 18 to design a decentralized private cloud.
 
