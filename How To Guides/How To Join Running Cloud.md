@@ -2,7 +2,7 @@
 
 
 
-## Step One: Install ZeroTier CLI Tool:
+## Step 1: Install ZeroTier CLI Tool:
 ```
 sudo curl -s https://install.zerotier.com | sudo bash
 sudo chown 777 /var/lib/zerotier-one/authtoken.secret #Gives full access to authentication token to allow ZertoTier Network joining
@@ -21,7 +21,7 @@ sudo nano /boot/cmdline.txt
 -Append "cgroup_memory=1 cgroup_enable=memory" to the end of the line and restart the machine
 
 
-## Step 2(A): Install K3S as a new Master:
+## Step 2: Install K3S as a new Master:
 In this scenario you will be joining your node as a new master to be joined to the cluster
 
 This scenario has the etcd workload running on an external Azure VM - this is subject to change
